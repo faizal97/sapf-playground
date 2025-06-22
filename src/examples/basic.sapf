@@ -1,0 +1,12 @@
+// Basic SAPF Examples
+// Simple sine wave at 440Hz (A4)
+sine(440) * 0.3
+
+// Chord - multiple frequencies
+sine(261.63) * 0.2 + sine(329.63) * 0.2 + sine(392.00) * 0.2
+
+// Frequency sweep
+sine(ramp(0, 1000, 2)) * 0.3
+
+// Amplitude modulation
+sine(440) * sine(2) * 0.3 
