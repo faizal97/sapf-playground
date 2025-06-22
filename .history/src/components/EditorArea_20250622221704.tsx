@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import Editor, { loader } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import { sapfLanguageConfiguration, sapfTokenizer, sapfTheme, sapfCompletionProvider, sapfHoverProvider } from '../core/SAPFLanguage';
 
@@ -129,63 +129,95 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
   const [activeTab, setActiveTab] = React.useState<'main' | 'examples'>('main');
   const [isLanguageRegistered, setIsLanguageRegistered] = React.useState(false);
 
-  // Initialize Monaco Editor and register SAPF language
+  // Register SAPF language when component mounts
   useEffect(() => {
-    const initializeMonaco = async () => {
+    const registerSAPFLanguage = () => {
+      // Check if running in browser environment
+      if (typeof window === 'undefined') return;
+
       try {
-        // Configure Monaco loader
-        loader.config({
-          paths: {
-            vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'
-          }
-        });
-
-        // Initialize Monaco
-        const monacoInstance = await loader.init();
-        console.log('Monaco Editor initialized');
-
-        // Check if SAPF language is already registered
-        const languages = monacoInstance.languages.getLanguages();
+        // Register the SAPF language ID
+        const languages = monaco.languages.getLanguages();
         const sapfExists = languages.some(lang => lang.id === 'sapf');
         
         if (!sapfExists) {
           console.log('Registering SAPF language...');
           
-          // Register the SAPF language
-          monacoInstance.languages.register({ id: 'sapf' });
+          // Register language
+          monaco.languages.register({ id: 'sapf' });
           
           // Set language configuration
-          monacoInstance.languages.setLanguageConfiguration('sapf', sapfLanguageConfiguration);
+          monaco.languages.setLanguageConfiguration('sapf', sapfLanguageConfiguration);
           
-          // Set tokenizer for syntax highlighting
-          monacoInstance.languages.setMonarchTokensProvider('sapf', sapfTokenizer);
+          // Set tokenizer (monarch syntax highlighting)
+          monaco.languages.setMonarchTokensProvider('sapf', sapfTokenizer);
           
-          // Define custom theme
-          monacoInstance.editor.defineTheme('sapf-dark', sapfTheme);
+          // Define and set theme
+          monaco.editor.defineTheme('sapf-dark', sapfTheme);
           
           // Register completion provider
-          monacoInstance.languages.registerCompletionItemProvider('sapf', sapfCompletionProvider);
+          monaco.languages.registerCompletionItemProvider('sapf', sapfCompletionProvider);
           
           // Register hover provider
-          monacoInstance.languages.registerHoverProvider('sapf', sapfHoverProvider);
+          monaco.languages.registerHoverProvider('sapf', sapfHoverProvider);
           
-          console.log('✅ SAPF language registered successfully');
+          console.log('SAPF language registered successfully');
           setIsLanguageRegistered(true);
         } else {
           console.log('SAPF language already registered');
           setIsLanguageRegistered(true);
         }
       } catch (error) {
-        console.error('Failed to initialize Monaco or register SAPF language:', error);
+        console.error('Failed to register SAPF language:', error);
       }
     };
 
-    initializeMonaco();
+    // Register language immediately if Monaco is available
+    if (monaco?.languages) {
+      registerSAPFLanguage();
+    }
   }, []);
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
-    console.log('Editor mounted');
+    
+    // Ensure language is registered when editor mounts
+    if (!isLanguageRegistered) {
+      const registerSAPFLanguage = () => {
+        try {
+          // Register language
+          monaco.languages.register({ id: 'sapf' });
+          
+          // Set language configuration
+          monaco.languages.setLanguageConfiguration('sapf', sapfLanguageConfiguration);
+          
+          // Set tokenizer
+          monaco.languages.setMonarchTokensProvider('sapf', sapfTokenizer);
+          
+          // Define and set theme
+          monaco.editor.defineTheme('sapf-dark', sapfTheme);
+          
+          // Register completion provider
+          monaco.languages.registerCompletionItemProvider('sapf', sapfCompletionProvider);
+          
+          // Register hover provider
+          monaco.languages.registerHoverProvider('sapf', sapfHoverProvider);
+          
+          console.log('SAPF language registered in editor mount');
+          setIsLanguageRegistered(true);
+          
+          // Force re-render with correct language
+          const model = editor.getModel();
+          if (model) {
+            monaco.editor.setModelLanguage(model, 'sapf');
+          }
+        } catch (error) {
+          console.error('Failed to register SAPF language in editor mount:', error);
+        }
+      };
+
+      registerSAPFLanguage();
+    }
     
     // Set up cursor position tracking
     editor.onDidChangeCursorPosition((e) => {
@@ -197,15 +229,9 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
     
     // Set up keyboard shortcuts
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, () => {
+      // Trigger run command (will be handled by parent)
       console.log('Run shortcut pressed');
     });
-    
-    // Ensure the model uses SAPF language
-    const model = editor.getModel();
-    if (model && isLanguageRegistered) {
-      monaco.editor.setModelLanguage(model, 'sapf');
-      console.log('Model language set to SAPF');
-    }
     
     // Focus the editor
     editor.focus();
@@ -215,6 +241,12 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
     const code = value || '';
     setCurrentCode(code);
     onCodeChange?.(code);
+  };
+
+  const formatCode = () => {
+    if (editorRef.current) {
+      editorRef.current.getAction('editor.action.formatDocument')?.run();
+    }
   };
 
   const getLineCount = () => {
@@ -247,7 +279,6 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
           theme="sapf-dark"
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
-          loading={<div style={{ padding: '20px', color: '#fff' }}>Loading SAPF Editor...</div>}
           options={{
             // Editor appearance
             minimap: { enabled: false },
@@ -328,7 +359,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
           {getLineCount()} lines • {getWordCount()} words
         </StatusItem>
         <StatusItem>
-          SAPF • UTF-8 {isLanguageRegistered ? '✅ Language Ready' : '⏳ Loading...'}
+          SAPF • UTF-8 {isLanguageRegistered ? '• Language Ready' : '• Loading...'}
         </StatusItem>
       </StatusBar>
     </EditorContainer>

@@ -73,8 +73,7 @@ export const sapfTokenizer: monaco.languages.IMonarchLanguage = {
       [/\b(frequency|freq|amplitude|amp|phase|gain|volume|pan|pitch)\b/, 'keyword.property'],
 
       // Operators
-      [/[+\-*=<>!&|^~%]/, 'operator'],
-      [/\//, 'operator'],
+      [/[+\-*\/=<>!&|^~%]/, 'operator'],
 
       // Delimiters
       [/[;,.]/, 'delimiter'],
@@ -88,9 +87,9 @@ export const sapfTokenizer: monaco.languages.IMonarchLanguage = {
     ],
 
     comment: [
-      [/[^/*]+/, 'comment'],
+      [/[^\/*]+/, 'comment'],
       [/\*\//, 'comment', '@pop'],
-      [/[/*]/, 'comment']
+      [/[\/*]/, 'comment']
     ],
 
     string_double: [
@@ -157,28 +156,32 @@ export const sapfCompletionProvider: monaco.languages.CompletionItemProvider = {
       {
         label: 'sine',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'sine(440)',
+        insertText: 'sine(${1:440})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Generate a sine wave at the specified frequency',
         range
       },
       {
         label: 'sawtooth',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'sawtooth(440)',
+        insertText: 'sawtooth(${1:440})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Generate a sawtooth wave at the specified frequency',
         range
       },
       {
         label: 'square',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'square(440)',
+        insertText: 'square(${1:440})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Generate a square wave at the specified frequency',
         range
       },
       {
         label: 'triangle',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'triangle(440)',
+        insertText: 'triangle(${1:440})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Generate a triangle wave at the specified frequency',
         range
       },
@@ -186,6 +189,7 @@ export const sapfCompletionProvider: monaco.languages.CompletionItemProvider = {
         label: 'noise',
         kind: monaco.languages.CompletionItemKind.Function,
         insertText: 'noise()',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Generate white noise',
         range
       },
@@ -194,14 +198,16 @@ export const sapfCompletionProvider: monaco.languages.CompletionItemProvider = {
       {
         label: 'ramp',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'ramp(0, 1, 1)',
+        insertText: 'ramp(${1:0}, ${2:1}, ${3:1})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Create a linear ramp from start to end over duration',
         range
       },
       {
         label: 'lerp',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'lerp(a, b, t)',
+        insertText: 'lerp(${1:a}, ${2:b}, ${3:t})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Linear interpolation between a and b by factor t',
         range
       },
@@ -210,14 +216,16 @@ export const sapfCompletionProvider: monaco.languages.CompletionItemProvider = {
       {
         label: 'delay',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'delay(signal, 0.3)',
+        insertText: 'delay(${1:signal}, ${2:0.3})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Add delay effect with specified time',
         range
       },
       {
         label: 'reverb',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'reverb(signal, 0.5)',
+        insertText: 'reverb(${1:signal}, ${2:0.5})',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Add reverb effect with specified amount',
         range
       },
@@ -226,7 +234,8 @@ export const sapfCompletionProvider: monaco.languages.CompletionItemProvider = {
       {
         label: 'chord',
         kind: monaco.languages.CompletionItemKind.Snippet,
-        insertText: 'sine(261.63) * 0.3 + sine(329.63) * 0.3 + sine(392.00) * 0.3',
+        insertText: 'sine(${1:261.63}) * ${2:0.3} + sine(${3:329.63}) * ${2:0.3} + sine(${4:392.00}) * ${2:0.3}',
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         documentation: 'Create a basic chord (C major by default)',
         range
       }
