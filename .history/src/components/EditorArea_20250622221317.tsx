@@ -138,10 +138,10 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
         monacoInstance.languages.register({ id: 'sapf' });
         
         // Set language configuration
-        monacoInstance.languages.setLanguageConfiguration('sapf', sapfLanguageConfiguration);
+        monacoInstance.languages.setLanguageConfiguration('sapf', sapfLanguageDefinition.configuration);
         
         // Set tokenizer
-        monacoInstance.languages.setMonarchTokensProvider('sapf', sapfTokenizer);
+        monacoInstance.languages.setMonarchTokensProvider('sapf', sapfLanguageDefinition.tokenizer);
         
         // Define and set theme
         monacoInstance.editor.defineTheme('sapf-dark', sapfTheme);
@@ -150,7 +150,37 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
         monacoInstance.languages.registerCompletionItemProvider('sapf', sapfCompletionProvider);
         
         // Register hover provider for documentation
-        monacoInstance.languages.registerHoverProvider('sapf', sapfHoverProvider);
+        monacoInstance.languages.registerHoverProvider('sapf', {
+          provideHover: (model, position) => {
+            const word = model.getWordAtPosition(position);
+            if (!word) return null;
+            
+            const hoverInfo: { [key: string]: string } = {
+              'sine': 'Generate a sine wave. Usage: sine(frequency)',
+              'sawtooth': 'Generate a sawtooth wave. Usage: sawtooth(frequency)',
+              'square': 'Generate a square wave. Usage: square(frequency)',
+              'triangle': 'Generate a triangle wave. Usage: triangle(frequency)',
+              'noise': 'Generate white noise. Usage: noise()',
+              'ramp': 'Create a linear ramp. Usage: ramp(start, end, duration)',
+              'delay': 'Add delay effect. Usage: delay(signal, time)',
+              'reverb': 'Add reverb effect. Usage: reverb(signal, amount)'
+            };
+            
+            const info = hoverInfo[word.word];
+            if (info) {
+              return {
+                range: new monacoInstance.Range(
+                  position.lineNumber,
+                  word.startColumn,
+                  position.lineNumber,
+                  word.endColumn
+                ),
+                contents: [{ value: info }]
+              };
+            }
+            return null;
+          }
+        });
       }
     };
 
@@ -263,7 +293,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
             suggestOnTriggerCharacters: true,
             acceptSuggestionOnEnter: 'on',
             tabCompletion: 'on',
-                         wordBasedSuggestions: 'currentDocument' as const,
+            wordBasedSuggestions: true,
             
             // Brackets and matching
             matchBrackets: 'always',

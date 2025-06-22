@@ -263,7 +263,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
             suggestOnTriggerCharacters: true,
             acceptSuggestionOnEnter: 'on',
             tabCompletion: 'on',
-                         wordBasedSuggestions: 'currentDocument' as const,
+            wordBasedSuggestions: true,
             
             // Brackets and matching
             matchBrackets: 'always',

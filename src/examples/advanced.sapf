@@ -1,0 +1,90 @@
+// Advanced SAPF Examples
+// Complex audio programming patterns and techniques
+
+// #region Polyrhythmic Patterns
+// Multiple rhythmic layers with different time signatures
+beat1 = sine(440) * (time % 1.0 < 0.1 ? 1 : 0) * 0.3
+beat2 = square(220) * (time % 1.5 < 0.05 ? 1 : 0) * 0.2
+beat3 = triangle(880) * (time % 0.75 < 0.03 ? 1 : 0) * 0.15
+
+polyrhythm = beat1 + beat2 + beat3
+// #endregion
+
+// #region Granular Synthesis
+// Micro-sound textures using short grain bursts
+grain_freq = random() * 1000 + 200
+grain_env = (time % 0.1 < 0.02 ? 1 : 0) * (1 - (time % 0.02) / 0.02)
+granular = sine(grain_freq) * grain_env * 0.1
+// #endregion
+
+// #region Complex Modulation
+// FM synthesis with multiple modulation layers
+carrier = 440
+mod1_freq = 3.5
+mod1_depth = 50
+mod2_freq = 0.2
+mod2_depth = 20
+
+modulated_freq = carrier + 
+  sine(mod1_freq) * mod1_depth + 
+  sine(mod2_freq) * mod2_depth
+
+fm_synth = sine(modulated_freq) * 0.3
+// #endregion
+
+// #region Spectral Filtering
+// Harmonic series with selective filtering
+fundamental = 110
+
+harmonic1 = sine(fundamental * 1) * 0.3
+harmonic2 = sine(fundamental * 2) * 0.2
+harmonic3 = sine(fundamental * 3) * 0.15
+harmonic4 = sine(fundamental * 4) * 0.1
+harmonic5 = sine(fundamental * 5) * 0.08
+
+// Apply time-varying amplitude to create spectral movement
+time_mod = sine(0.5) * 0.5 + 0.5
+
+filtered_spectrum = 
+  harmonic1 * 1.0 +
+  harmonic2 * time_mod +
+  harmonic3 * (1 - time_mod) +
+  harmonic4 * sine(1.2) * 0.5 + 0.5 +
+  harmonic5 * triangle(0.8) * 0.3 + 0.3
+// #endregion
+
+// #region Algorithmic Composition
+// Generative melody using mathematical sequences
+note_duration = 0.5
+current_time = floor(time / note_duration)
+
+// Fibonacci-inspired frequency sequence
+fib_a = 261.63  // C4
+fib_b = 293.66  // D4
+fib_sequence = (current_time % 2 == 0) ? fib_a : fib_b
+
+// Envelope for note articulation
+note_env = 1 - ((time % note_duration) / note_duration)
+note_env = note_env * note_env  // Exponential decay
+
+algorithmic_melody = sine(fib_sequence) * note_env * 0.25
+// #endregion
+
+// #region Spatial Audio
+// Stereo panning and 3D positioning
+pan_position = sine(0.3) * 0.8  // -0.8 to 0.8
+left_channel = sine(440) * (pan_position < 0 ? abs(pan_position) : 0) * 0.3
+right_channel = sine(440) * (pan_position > 0 ? pan_position : 0) * 0.3
+
+spatial_sound = left_channel + right_channel
+// #endregion
+
+// Final mix - combine all elements
+main_output = (
+  polyrhythm * 0.3 +
+  granular * 0.4 +
+  fm_synth * 0.2 +
+  filtered_spectrum * 0.15 +
+  algorithmic_melody * 0.5 +
+  spatial_sound * 0.2
+) * 0.5  // Master volume 
